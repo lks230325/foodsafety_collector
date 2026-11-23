@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+  <title>충청·전북 양념육 및 세절·포장육 가공장 통합 대시보드</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>" />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --navy: #163a5f;
+      --navy-dark: #0f2944;
+      --accent: #2563eb;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --both-bg: #fef3c7;
+      --both-fg: #92400e;
+      --seasoned-bg: #ffedd5;
+      --seasoned-fg: #9a3412;
+      --sliced-bg: #dcfce7;
+      --sliced-fg: #166534;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Malgun Gothic", "맑은 고딕", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* 보안 잠금 화면 (복호화 성공 전 유일하게 노출되는 영역) */
+    #authOverlay {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(145deg, #0b1f35 0%, #163a5f 55%, #1e4976 100%);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 36px 30px 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    .auth-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: #eff6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.9rem;
+    }
+    .auth-card h1 {
+      margin: 0 0 8px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--navy-dark);
+    }
+    .auth-card p {
+      margin: 0 0 22px;
+      font-size: 0.87rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .pw-wrap {
+      position: relative;
+      margin-bottom: 14px;
+    }
+    .pw-wrap input {
+      width: 100%;
+      padding: 13px 44px 13px 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pw-wrap input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--muted);
+      padding: 4px 6px;
+    }
+    .auth-submit {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .auth-submit:hover { background: #1d4ed8; }
+    .auth-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+    .auth-msg {
+      min-height: 22px;
+      margin-top: 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #dc2626;
+    }
+    .auth-foot {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.76rem;
+      color: #94a3b8;
+    }
+
+    /* 본문 대시보드 (복호화 전 숨김) */
+    #appShell { display: none; }
+
+    header {
+      background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+      color: #fff;
+      padding: 24px 20px;
+      border-bottom: 3px solid #3b82f6;
+    }
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-title h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .header-title p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--navy);
+      border-color: #cbd5e1;
+    }
+    .btn-secondary:hover { background: #f1f5f9; }
+    .btn-lock {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+    .btn-lock:hover { background: rgba(255, 255, 255, 0.24); }
+    .meta-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      font-size: 0.8rem;
+      color: #e2e8f0;
+    }
+    main { padding: 22px 0 48px; }
+    .section-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+      color: var(--navy-dark);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 960px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+    .kpi-card.active-card {
+      border: 2px solid var(--accent);
+      background: #eff6ff;
+    }
+    .kpi-label {
+      font-size: 0.84rem;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .kpi-val {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--navy-dark);
+    }
+    .kpi-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr 1.2fr 2fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    @media (max-width: 1024px) {
+      .filter-bar { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .filter-bar { grid-template-columns: 1fr; }
+    }
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .field select, .field input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--text);
+    }
+    .field select:focus, .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .cross-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .cross-table th, .cross-table td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: right;
+    }
+    .cross-table th:first-child, .cross-table td:first-child {
+      text-align: left;
+      font-weight: 700;
+    }
+    .cross-table thead th {
+      background: #f8fafc;
+      color: var(--navy-dark);
+      text-align: center;
+    }
+    .table-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      min-width: 1180px;
+    }
+    table.data-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--navy);
+      color: #fff;
+      padding: 10px 10px;
+      text-align: center;
+      font-weight: 700;
+      white-space: nowrap;
+      z-index: 1;
+    }
+    table.data-table tbody td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    table.data-table tbody tr:hover {
+      background: #f8fafc;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.77rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-both { background: var(--both-bg); color: var(--both-fg); }
+    .badge-seasoned { background: var(--seasoned-bg); color: var(--seasoned-fg); }
+    .badge-sliced { background: var(--sliced-bg); color: var(--sliced-fg); }
+    .map-link {
+      display: inline-block;
+      padding: 2px 6px;
+      margin-left: 5px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 4px;
+      text-decoration: none;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .map-link:hover { background: #bae6fd; }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .page-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .page-btn.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--navy-dark);
+      user-select: none;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      padding: 20px 16px 36px;
+    }
+  </style>
+</head>
+<body>
+  <!-- AES-256-GCM 보안 잠금 화면 -->
+  <div id="authOverlay">
+    <form class="auth-card" id="authForm" autocomplete="off">
+      <div class="auth-icon">🔒</div>
+      <h1>보안 대시보드 접속 인증</h1>
+      <p>
+        충청·전북 양념육 및 세절·포장육 가공장 통합 대시보드입니다.<br />
+        사내 승인 비밀번호를 입력하면 데이터가 복호화됩니다.
+      </p>
+      <div class="pw-wrap">
+        <input
+          type="password"
+          id="inpPassword"
+          placeholder="접속 비밀번호 입력"
+          required
+          autofocus
+        />
+        <button type="button" class="pw-toggle" id="btnTogglePw" title="비밀번호 표시/숨기기">👁️</button>
+      </div>
+      <button type="submit" class="auth-submit" id="btnUnlock">🔓 잠금 해제</button>
+      <div class="auth-msg" id="authMsg"></div>
+      <div class="auth-foot">
+        🔐 PBKDF2-SHA256 · AES-256-GCM 암호화 보호 적용됨 (탭 종료 시 자동 잠금)
+      </div>
+    </form>
+  </div>
+
+  <!-- 복호화 성공 후에만 렌더링되는 본문 -->
+  <div id="appShell">
+    <header>
+      <div class="container">
+        <div class="header-top">
+          <div class="header-title">
+            <h1>🥩 충청·전북 양념육 및 세절·포장육 가공장 통합 대시보드</h1>
+            <p>식품의약품안전처(식품안전나라) OpenAPI(<code>I1300</code> · <code>I1320</code> · <code>I2500</code> · <code>C006</code>) 기반 실데이터 통합 현황</p>
+            <span class="meta-badge" id="updatedBadge">데이터 준비됨</span>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" type="button" id="btnDownloadEncryptedXlsx">
+              📥 전체 엑셀(.xlsx) 다운로드 (5개 시트 분리)
+            </button>
+            <button class="btn btn-secondary" type="button" id="btnDownloadFilteredCsv">
+              📄 현재 검색결과 CSV 다운로드
+            </button>
+            <button class="btn btn-lock" type="button" id="btnLockNow" title="즉시 화면 잠금">
+              🔒 잠금
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="section-title">
+        <span>📊 가공구분 · 지역별 가공장 요약 (카드 클릭 시 즉시 필터)</span>
+        <button class="btn btn-secondary" type="button" id="btnResetFilters" style="padding:5px 11px;font-size:0.8rem;">
+          🔄 전체 필터 초기화
+        </button>
+      </div>
+
+      <div class="kpi-grid" id="catKpiGrid">
+        <div class="kpi-card" data-filter-type="all">
+          <div class="kpi-label">전체 대상 가공장</div>
+          <div class="kpi-val" id="kpiTotal">-</div>
+          <div class="kpi-sub">충남 · 충북 · 대전 · 전북 합계</div>
+        </div>
+        <div class="kpi-card" data-filter-cat="양념육 + 세절·포장육 겸업">
+          <div class="kpi-label">양념육 + 세절·포장육 겸업</div>
+          <div class="kpi-val" id="kpiBoth">-</div>
+          <div class="kpi-sub">식육가공 + 식육포장처리 동시 운영</div>
+        </div>
+        <div class="kpi-card" data-filter-cat="양념육 가공장">
+          <div class="kpi-label">양념육 가공장 (식육가공업)</div>
+          <div class="kpi-val" id="kpiSeasoned">-</div>
+          <div class="kpi-sub">양념육 · 불고기 · 갈비 · 육가공</div>
+        </div>
+        <div class="kpi-card" data-filter-cat="식육포장처리(세절·포장육)">
+          <div class="kpi-label">식육포장처리 (세절·포장육)</div>
+          <div class="kpi-val" id="kpiSliced">-</div>
+          <div class="kpi-sub">세절 · 슬라이스 · 포장육 전문</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="regionKpiGrid">
+        <div class="kpi-card" data-filter-sido="충청남도">
+          <div class="kpi-label">충청남도</div>
+          <div class="kpi-val" id="kpiCN">-</div>
+          <div class="kpi-sub">천안 · 홍성 · 논산 · 아산 등</div>
+        </div>
+        <div class="kpi-card" data-filter-sido="충청북도">
+          <div class="kpi-label">충청북도</div>
+          <div class="kpi-val" id="kpiCB">-</div>
+          <div class="kpi-sub">청주 · 음성 · 진천 · 충주 등</div>
+        </div>
+        <div class="kpi-card" data-filter-sido="대전광역시">
+          <div class="kpi-label">대전광역시</div>
+          <div class="kpi-val" id="kpiDJ">-</div>
+          <div class="kpi-sub">대덕 · 유성 · 서구 · 중구 · 동구</div>
+        </div>
+        <div class="kpi-card" data-filter-sido="전북특별자치도(전라북도)">
+          <div class="kpi-label">전북특별자치도 (구 전라북도)</div>
+          <div class="kpi-val" id="kpiJB">-</div>
+          <div class="kpi-sub">익산 · 전주 · 정읍 · 김제 · 완주 등</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <details>
+          <summary>📈 지역별 × 가공구분 교차 집계표 펼치기</summary>
+          <div style="overflow-x:auto; margin-top:12px;">
+            <table class="cross-table" id="crossTable">
+              <thead>
+                <tr>
+                  <th>시/도</th>
+                  <th>양념육 + 세절·포장육 겸업</th>
+                  <th>양념육 가공장</th>
+                  <th>식육포장처리(세절·포장육)</th>
+                  <th>합계</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <div class="panel">
+        <div class="filter-bar">
+          <div class="field">
+            <label for="selSido">시/도 선택</label>
+            <select id="selSido">
+              <option value="">전체 시/도</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="selSigungu">시/군/구 선택</label>
+            <select id="selSigungu">
+              <option value="">전체 시/군/구</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="selCategory">가공구분 선택</label>
+            <select id="selCategory">
+              <option value="">전체 가공구분</option>
+              <option value="양념육 + 세절·포장육 겸업">양념육 + 세절·포장육 겸업</option>
+              <option value="양념육 가공장">양념육 가공장</option>
+              <option value="식육포장처리(세절·포장육)">식육포장처리(세절·포장육)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="inpKeyword">통합 키워드 검색</label>
+            <input type="search" id="inpKeyword" placeholder="업체명, 시/군/구, 도로명주소, 생산품목, 인허가번호 입력..." />
+          </div>
+          <div class="field">
+            <label for="selPageSize">표시 건수</label>
+            <select id="selPageSize">
+              <option value="50">50건씩</option>
+              <option value="100" selected>100건씩</option>
+              <option value="300">300건씩</option>
+              <option value="2000">전체 보기</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="table-toolbar">
+          <div id="resultSummary" style="font-weight:700; color:var(--navy-dark);">검색 결과 집계 중...</div>
+          <div style="font-size:0.8rem; color:var(--muted);">
+            💡 업체명 옆 <strong>[N지도]</strong> 클릭 시 네이버 지도에서 사업장 위치·대표번호를 바로 확인할 수 있습니다.
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>시/도</th>
+                <th>시/군/구</th>
+                <th>가공구분</th>
+                <th>업체명</th>
+                <th>인허가업종</th>
+                <th>연락처</th>
+                <th>소재지 주소</th>
+                <th>주요 품목유형</th>
+                <th>대표 생산품목 리스트</th>
+                <th>등록 품목수</th>
+                <th>인허가번호</th>
+                <th>허가일자</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination" id="paginationBar"></div>
+      </div>
+    </main>
+
+    <footer>
+      데이터 출처: 식품의약품안전처 식품안전나라 OpenAPI (AES-256-GCM 암호화 보호) | 엑셀 다운로드 시 5개 시트([전체_통합], [충청남도], [충청북도], [대전광역시], [전북특별자치도]) 자동 분리 제공
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const SESSION_PW_KEY = "__fsc_session_pw_v1";
+      let ALL_ROWS = [];
+      let FILTERED_ROWS = [];
+      let currentPage = 1;
+      let sidosInitialized = false;
+      let activePassword = "";
+      let encryptedJsonCache = null;
+      let failCount = 0;
+      let lockedUntil = 0;
+
+      const elAuthOverlay = document.getElementById("authOverlay");
+      const elAppShell = document.getElementById("appShell");
+      const elAuthForm = document.getElementById("authForm");
+      const elInpPw = document.getElementById("inpPassword");
+      const elBtnUnlock = document.getElementById("btnUnlock");
+      const elAuthMsg = document.getElementById("authMsg");
+
+      const elSido = document.getElementById("selSido");
+      const elSigungu = document.getElementById("selSigungu");
+      const elCategory = document.getElementById("selCategory");
+      const elKeyword = document.getElementById("inpKeyword");
+      const elPageSize = document.getElementById("selPageSize");
+      const elTableBody = document.getElementById("tableBody");
+      const elPagination = document.getElementById("paginationBar");
+      const elSummary = document.getElementById("resultSummary");
+
+      function base64ToBytes(b64) {
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) {
+          bytes[i] = bin.charCodeAt(i);
+        }
+        return bytes;
+      }
+
+      async function decryptBundle(bundle, password) {
+        const enc = new TextEncoder();
+        const salt = base64ToBytes(bundle.salt);
+        const iv = base64ToBytes(bundle.iv);
+        const ct = base64ToBytes(bundle.ct);
+        const iterations = Number(bundle.iter) || 600000;
+
+        const keyMaterial = await window.crypto.subtle.importKey(
+          "raw",
+          enc.encode(password),
+          { name: "PBKDF2" },
+          false,
+          ["deriveKey"]
+        );
+
+        const aesKey = await window.crypto.subtle.deriveKey(
+          {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: iterations,
+            hash: "SHA-256"
+          },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["decrypt"]
+        );
+
+        const decryptedBuf = await window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv, tagLength: 128 },
+          aesKey,
+          ct
+        );
+        return new Uint8Array(decryptedBuf);
+      }
+
+      async function unlockWithPassword(pw, fromSession) {
+        if (Date.now() < lockedUntil) {
+          const waitSec = Math.ceil((lockedUntil - Date.now()) / 1000);
+          elAuthMsg.textContent = "입력 오류가 누적되었습니다. " + waitSec + "초 후 다시 시도해 주세요.";
+          return;
+        }
+
+        elBtnUnlock.disabled = true;
+        elBtnUnlock.textContent = "🔐 데이터 복호화 중...";
+        elAuthMsg.style.color = "#2563eb";
+        elAuthMsg.textContent = "보안 키 검증 및 복호화 진행 중...";
+
+        try {
+          if (!encryptedJsonCache) {
+            const resp = await fetch("./data/processors_latest.enc.json");
+            if (!resp.ok) throw new Error("암호화 데이터 로드 실패 (HTTP " + resp.status + ")");
+            encryptedJsonCache = await resp.json();
+          }
+
+          const plainBytes = await decryptBundle(encryptedJsonCache, pw);
+          const payload = JSON.parse(new TextDecoder("utf-8").decode(plainBytes));
+
+          activePassword = pw;
+          failCount = 0;
+          try { sessionStorage.setItem(SESSION_PW_KEY, pw); } catch (e) {}
+
+          ALL_ROWS = payload.rows || [];
+          if (!sidosInitialized) {
+            populateSidoOptions();
+            sidosInitialized = true;
+          }
+          updateSigunguOptions();
+          renderSummaryMetrics(payload.meta || {});
+          applyFilters();
+
+          elAuthOverlay.style.display = "none";
+          elAppShell.style.display = "block";
+          elInpPw.value = "";
+          elAuthMsg.textContent = "";
+        } catch (err) {
+          if (fromSession) {
+            try { sessionStorage.removeItem(SESSION_PW_KEY); } catch (e) {}
+            elAuthMsg.textContent = "";
+          } else {
+            failCount += 1;
+            elAuthMsg.style.color = "#dc2626";
+            if (failCount >= 5) {
+              lockedUntil = Date.now() + 15000;
+              failCount = 0;
+              elAuthMsg.textContent = "❌ 5회 오류로 15초간 입력이 일시 제한됩니다.";
+            } else {
+              elAuthMsg.textContent = "❌ 비밀번호가 일치하지 않습니다.";
+            }
+            elInpPw.select();
+          }
+        } finally {
+          elBtnUnlock.disabled = false;
+          elBtnUnlock.textContent = "🔓 잠금 해제";
+        }
+      }
+
+      async function downloadEncryptedExcel() {
+        const btn = document.getElementById("btnDownloadEncryptedXlsx");
+        const origLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "⏳ 엑셀 복호화 중...";
+        try {
+          const resp = await fetch("./data/meat_processors_5sheets.enc.json");
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          const encXlsxBundle = await resp.json();
+          const xlsxBytes = await decryptBundle(encXlsxBundle, activePassword);
+          const blob = new Blob([xlsxBytes], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "충청전북_양념육_세절육_가공장현황.xlsx";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          alert("엑셀 파일 복호화 다운로드 중 오류가 발생했습니다: " + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = origLabel;
+        }
+      }
+
+      function escapeHtml(str) {
+        if (str === null || str === undefined) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function badgeForCategory(cat) {
+        if (cat === "양념육 + 세절·포장육 겸업") {
+          return '<span class="badge badge-both">' + escapeHtml(cat) + "</span>";
+        }
+        if (cat === "양념육 가공장") {
+          return '<span class="badge badge-seasoned">' + escapeHtml(cat) + "</span>";
+        }
+        return '<span class="badge badge-sliced">' + escapeHtml(cat) + "</span>";
+      }
+
+      function populateSidoOptions() {
+        const sidos = ["충청남도", "충청북도", "대전광역시", "전북특별자치도(전라북도)"];
+        sidos.forEach(function (s) {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.textContent = s;
+          elSido.appendChild(opt);
+        });
+      }
+
+      function updateSigunguOptions() {
+        const selectedSido = elSido.value;
+        const prevVal = elSigungu.value;
+        const set = new Set();
+        ALL_ROWS.forEach(function (r) {
+          if (!selectedSido || r["시/도"] === selectedSido) {
+            if (r["시/군/구"]) set.add(r["시/군/구"]);
+          }
+        });
+        const sorted = Array.from(set).sort(function (a, b) {
+          return a.localeCompare(b, "ko");
+        });
+        elSigungu.innerHTML = '<option value="">전체 시/군/구 (' + sorted.length + "개)</option>";
+        sorted.forEach(function (sg) {
+          const opt = document.createElement("option");
+          opt.value = sg;
+          opt.textContent = sg;
+          elSigungu.appendChild(opt);
+        });
+        if (sorted.includes(prevVal)) {
+          elSigungu.value = prevVal;
+        }
+      }
+
+      function renderSummaryMetrics(meta) {
+        const total = ALL_ROWS.length;
+        let both = 0, seasoned = 0, sliced = 0;
+        let cn = 0, cb = 0, dj = 0, jb = 0;
+
+        const cross = {
+          "충청남도": { both: 0, seasoned: 0, sliced: 0 },
+          "충청북도": { both: 0, seasoned: 0, sliced: 0 },
+          "대전광역시": { both: 0, seasoned: 0, sliced: 0 },
+          "전북특별자치도(전라북도)": { both: 0, seasoned: 0, sliced: 0 }
+        };
+
+        ALL_ROWS.forEach(function (r) {
+          const cat = r["가공구분"];
+          const sido = r["시/도"];
+          if (cat === "양념육 + 세절·포장육 겸업") both++;
+          else if (cat === "양념육 가공장") seasoned++;
+          else if (cat === "식육포장처리(세절·포장육)") sliced++;
+
+          if (sido === "충청남도") cn++;
+          else if (sido === "충청북도") cb++;
+          else if (sido === "대전광역시") dj++;
+          else if (sido === "전북특별자치도(전라북도)") jb++;
+
+          if (cross[sido]) {
+            if (cat === "양념육 + 세절·포장육 겸업") cross[sido].both++;
+            else if (cat === "양념육 가공장") cross[sido].seasoned++;
+            else if (cat === "식육포장처리(세절·포장육)") cross[sido].sliced++;
+          }
+        });
+
+        document.getElementById("kpiTotal").textContent = total.toLocaleString() + "개소";
+        document.getElementById("kpiBoth").textContent = both.toLocaleString() + "개소";
+        document.getElementById("kpiSeasoned").textContent = seasoned.toLocaleString() + "개소";
+        document.getElementById("kpiSliced").textContent = sliced.toLocaleString() + "개소";
+        document.getElementById("kpiCN").textContent = cn.toLocaleString() + "개소";
+        document.getElementById("kpiCB").textContent = cb.toLocaleString() + "개소";
+        document.getElementById("kpiDJ").textContent = dj.toLocaleString() + "개소";
+        document.getElementById("kpiJB").textContent = jb.toLocaleString() + "개소";
+
+        document.getElementById("updatedBadge").textContent =
+          "🔐 보안 인증됨 | 기준일시: " + (meta.generated_at || "-") + " | 총 " + total.toLocaleString() + "개 가공장";
+
+        const crossBody = document.querySelector("#crossTable tbody");
+        crossBody.innerHTML = "";
+        Object.keys(cross).forEach(function (sido) {
+          const c = cross[sido];
+          const sum = c.both + c.seasoned + c.sliced;
+          const tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + escapeHtml(sido) + "</td>" +
+            "<td>" + c.both.toLocaleString() + "</td>" +
+            "<td>" + c.seasoned.toLocaleString() + "</td>" +
+            "<td>" + c.sliced.toLocaleString() + "</td>" +
+            "<td><strong>" + sum.toLocaleString() + "</strong></td>";
+          crossBody.appendChild(tr);
+        });
+        const trTotal = document.createElement("tr");
+        trTotal.style.background = "#f1f5f9";
+        trTotal.innerHTML =
+          "<td>합계</td>" +
+          "<td><strong>" + both.toLocaleString() + "</strong></td>" +
+          "<td><strong>" + seasoned.toLocaleString() + "</strong></td>" +
+          "<td><strong>" + sliced.toLocaleString() + "</strong></td>" +
+          "<td><strong>" + total.toLocaleString() + "</strong></td>";
+        crossBody.appendChild(trTotal);
+      }
+
+      function highlightActiveCards() {
+        document.querySelectorAll(".kpi-card").forEach(function (card) {
+          card.classList.remove("active-card");
+          const cCat = card.getAttribute("data-filter-cat");
+          const cSido = card.getAttribute("data-filter-sido");
+          const cAll = card.getAttribute("data-filter-type");
+          if (cAll === "all" && !elSido.value && !elCategory.value && !elSigungu.value && !elKeyword.value.trim()) {
+            card.classList.add("active-card");
+          }
+          if (cCat && elCategory.value === cCat) card.classList.add("active-card");
+          if (cSido && elSido.value === cSido) card.classList.add("active-card");
+        });
+      }
+
+      function applyFilters() {
+        const sido = elSido.value;
+        const sigungu = elSigungu.value;
+        const cat = elCategory.value;
+        const kw = elKeyword.value.trim().toLowerCase();
+
+        FILTERED_ROWS = ALL_ROWS.filter(function (r) {
+          if (sido && r["시/도"] !== sido) return false;
+          if (sigungu && r["시/군/구"] !== sigungu) return false;
+          if (cat && r["가공구분"] !== cat) return false;
+          if (kw) {
+            const hay = (
+              (r["업체명"] || "") + " " +
+              (r["시/군/구"] || "") + " " +
+              (r["소재지 주소"] || "") + " " +
+              (r["주요 품목유형"] || "") + " " +
+              (r["대표 생산품목 리스트"] || "") + " " +
+              (r["인허가번호"] || "")
+            ).toLowerCase();
+            if (!hay.includes(kw)) return false;
+          }
+          return true;
+        });
+
+        currentPage = 1;
+        highlightActiveCards();
+        renderTable();
+      }
+
+      function renderTable() {
+        const pageSize = parseInt(elPageSize.value, 10) || 100;
+        const total = FILTERED_ROWS.length;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const startIdx = (currentPage - 1) * pageSize;
+        const pageRows = FILTERED_ROWS.slice(startIdx, startIdx + pageSize);
+
+        elSummary.innerHTML =
+          "검색 결과: <strong>" + total.toLocaleString() + "개소</strong> " +
+          "(전체 " + ALL_ROWS.length.toLocaleString() + "개소 중 | " +
+          currentPage + " / " + totalPages + " 페이지)";
+
+        if (pageRows.length === 0) {
+          elTableBody.innerHTML =
+            '<tr><td colspan="13" style="text-align:center; padding:36px; color:#64748b;">조건에 일치하는 가공장이 없습니다.</td></tr>';
+          elPagination.innerHTML = "";
+          return;
+        }
+
+        const htmlRows = pageRows.map(function (r, idx) {
+          const rowNo = startIdx + idx + 1;
+          const naverQuery = encodeURIComponent((r["업체명"] || "") + " " + (r["시/군/구"] || ""));
+          const mapUrl = "https://map.naver.com/p/search/" + naverQuery;
+          return (
+            "<tr>" +
+            '<td style="text-align:center; color:#64748b;">' + rowNo + "</td>" +
+            '<td style="text-align:center; white-space:nowrap;">' + escapeHtml(r["시/도"]) + "</td>" +
+            '<td style="text-align:center; white-space:nowrap;">' + escapeHtml(r["시/군/구"]) + "</td>" +
+            '<td style="text-align:center;">' + badgeForCategory(r["가공구분"]) + "</td>" +
+            '<td style="font-weight:700;">' +
+              escapeHtml(r["업체명"]) +
+              '<a class="map-link" href="' + mapUrl + '" target="_blank" rel="noopener noreferrer" title="네이버 지도에서 위치·연락처 검색">N지도</a>' +
+            "</td>" +
+            "<td>" + escapeHtml(r["인허가업종"]) + "</td>" +
+            '<td style="text-align:center; white-space:nowrap;">' + escapeHtml(r["연락처(전화번호)"] || "-") + "</td>" +
+            "<td>" + escapeHtml(r["소재지 주소"]) + "</td>" +
+            "<td>" + escapeHtml(r["주요 품목유형"] || "-") + "</td>" +
+            "<td>" + escapeHtml(r["대표 생산품목 리스트"] || "-") + "</td>" +
+            '<td style="text-align:right; white-space:nowrap;">' + Number(r["등록 품목수"] || 0).toLocaleString() + "건</td>" +
+            '<td style="text-align:center; font-size:0.8rem;">' + escapeHtml(r["인허가번호"]) + "</td>" +
+            '<td style="text-align:center; white-space:nowrap;">' + escapeHtml(r["허가일자"]) + "</td>" +
+            "</tr>"
+          );
+        });
+        elTableBody.innerHTML = htmlRows.join("");
+        renderPagination(totalPages);
+      }
+
+      function renderPagination(totalPages) {
+        if (totalPages <= 1) {
+          elPagination.innerHTML = "";
+          return;
+        }
+        let html = "";
+        html += '<button class="page-btn" data-page="' + (currentPage - 1) + '" ' + (currentPage === 1 ? "disabled" : "") + ">이전</button>";
+
+        const startP = Math.max(1, currentPage - 4);
+        const endP = Math.min(totalPages, startP + 8);
+        for (let p = startP; p <= endP; p++) {
+          html += '<button class="page-btn ' + (p === currentPage ? "active" : "") + '" data-page="' + p + '">' + p + "</button>";
+        }
+
+        html += '<button class="page-btn" data-page="' + (currentPage + 1) + '" ' + (currentPage === totalPages ? "disabled" : "") + ">다음</button>";
+        elPagination.innerHTML = html;
+
+        elPagination.querySelectorAll(".page-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            const target = parseInt(btn.getAttribute("data-page"), 10);
+            if (target >= 1 && target <= totalPages) {
+              currentPage = target;
+              renderTable();
+              window.scrollTo({ top: 380, behavior: "smooth" });
+            }
+          });
+        });
+      }
+
+      function downloadFilteredCsv() {
+        const cols = [
+          "시/도", "시/군/구", "가공구분", "업체명", "대표자", "인허가업종",
+          "연락처(전화번호)", "소재지 주소", "주요 품목유형", "대표 생산품목 리스트",
+          "등록 품목수", "인허가번호", "허가일자"
+        ];
+        const lines = [cols.join(",")];
+        FILTERED_ROWS.forEach(function (r) {
+          const vals = cols.map(function (c) {
+            const v = r[c] === null || r[c] === undefined ? "" : String(r[c]);
+            return '"' + v.replace(/"/g, '""') + '"';
+          });
+          lines.push(vals.join(","));
+        });
+        const bom = "\uFEFF";
+        const blob = new Blob([bom + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "충청전북_양념육_세절육_가공장_검색결과_" + FILTERED_ROWS.length + "건.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // 인증 폼 이벤트
+      elAuthForm.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        const pw = elInpPw.value.trim();
+        if (!pw) return;
+        unlockWithPassword(pw, false);
+      });
+
+      document.getElementById("btnTogglePw").addEventListener("click", function () {
+        elInpPw.type = (elInpPw.type === "password") ? "text" : "password";
+        elInpPw.focus();
+      });
+
+      document.getElementById("btnLockNow").addEventListener("click", function () {
+        activePassword = "";
+        ALL_ROWS = [];
+        FILTERED_ROWS = [];
+        elTableBody.innerHTML = "";
+        try { sessionStorage.removeItem(SESSION_PW_KEY); } catch (e) {}
+        elAppShell.style.display = "none";
+        elAuthOverlay.style.display = "flex";
+        elInpPw.value = "";
+        elInpPw.focus();
+      });
+
+      document.getElementById("btnDownloadEncryptedXlsx").addEventListener("click", downloadEncryptedExcel);
+      document.getElementById("btnDownloadFilteredCsv").addEventListener("click", downloadFilteredCsv);
+
+      // 대시보드 필터 이벤트
+      elSido.addEventListener("change", function () {
+        updateSigunguOptions();
+        applyFilters();
+      });
+      elSigungu.addEventListener("change", applyFilters);
+      elCategory.addEventListener("change", applyFilters);
+      elPageSize.addEventListener("change", applyFilters);
+      elKeyword.addEventListener("input", applyFilters);
+
+      document.getElementById("btnResetFilters").addEventListener("click", function () {
+        elSido.value = "";
+        updateSigunguOptions();
+        elSigungu.value = "";
+        elCategory.value = "";
+        elKeyword.value = "";
+        applyFilters();
+      });
+
+      document.querySelectorAll(".kpi-card").forEach(function (card) {
+        card.addEventListener("click", function () {
+          const fAll = card.getAttribute("data-filter-type");
+          const fCat = card.getAttribute("data-filter-cat");
+          const fSido = card.getAttribute("data-filter-sido");
+          if (fAll === "all") {
+            elSido.value = "";
+            updateSigunguOptions();
+            elSigungu.value = "";
+            elCategory.value = "";
+            elKeyword.value = "";
+          } else if (fCat) {
+            elCategory.value = (elCategory.value === fCat) ? "" : fCat;
+          } else if (fSido) {
+            elSido.value = (elSido.value === fSido) ? "" : fSido;
+            updateSigunguOptions();
+          }
+          applyFilters();
+        });
+      });
+
+      // 동일 탭 새로고침 시 세션 복원 지원 (탭 닫으면 즉시 소멸)
+      try {
+        const savedPw = sessionStorage.getItem(SESSION_PW_KEY);
+        if (savedPw) {
+          unlockWithPassword(savedPw, true);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

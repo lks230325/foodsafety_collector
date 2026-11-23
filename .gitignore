@@ -1,0 +1,19 @@
+# 민감 인증키 및 대시보드 비밀번호 보호 (절대 커밋 금지)
+.env
+**/.env
+
+# 파이썬 캐시 및 가상환경
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.packages/
+
+# 로컬 원시 캐시, 빌드 산출물 및 평문 데이터 제외 (암호화된 static_data/*.enc.json만 커밋 허용)
+data/
+dist/
+충청전북_양념육_세절육_가공장현황_*.xlsx
+*.parquet
+static_data/*.xlsx
+static_data/*.json
+!static_data/*.enc.json
